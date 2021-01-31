@@ -80,8 +80,6 @@ class Show(db.Model):
   def __repr__(self):
     return f'<Show ID: {self.id}, Start Date: {self.start_date}, Artist: {self.artist_id}, Venue: {self.venue_id}>' 
 
-#tmp for testing purpose
-db.create_all()
 
 #----------------------------------------------------------------------------#
 # Filters.
