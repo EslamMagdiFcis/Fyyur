@@ -61,7 +61,7 @@ class Artist(db.Model):
     image_link = db.Column(db.String(500))
     facebook_link = db.Column(db.String(120))
     website = db.Column(db.String(500))
-    seeking_talent = db.Column(db.Boolean, default=False)
+    seeking_venue = db.Column(db.Boolean, default=False)
     seeking_description = db.Column(db.String(500))
     shows = db.relationship('Show', backref='artist_shows', lazy=True)
 
@@ -208,10 +208,6 @@ def create_venue_form():
 
 @app.route('/venues/create', methods=['POST'])
 def create_venue_submission():
-  # venue = Venue(name=request.form.get('name', ''), city=request.form.get('city', ''),
-  # state=request.form.get('state', ''), address=request.form.get('address', ''), 
-  # phone=request.form.get('phone', ''), image_link=request.form.get('image_link', ''),
-  # facebook_link=request.form.get('facebook_link', ''), genres=request.form.getlist('genres'))
 
   form = VenueForm(request.form)
 
@@ -313,7 +309,7 @@ def show_artist(artist_id):
     "phone": artist.phone,
     "website": artist.website,
     "facebook_link": artist.facebook_link,
-    "seeking_talent": artist.seeking_talent,
+    "seeking_venue": artist.seeking_venue,
     "seeking_description": artist.seeking_description,
     "image_link": artist.image_link,
     "past_shows": past_shows_list,
@@ -328,7 +324,7 @@ def show_artist(artist_id):
 #  ----------------------------------------------------------------
 @app.route('/artists/<int:artist_id>/edit', methods=['GET'])
 def edit_artist(artist_id):
-  # form = ArtistForm()
+  form = ArtistForm()
   artist = Artist.query.get(artist_id)
 
   form.name.data = artist.name
@@ -338,6 +334,9 @@ def edit_artist(artist_id):
   form.image_link.data = artist.image_link
   form.facebook_link.data = artist.facebook_link
   form.genres.data = artist.genres
+  form.website.data = artist.website
+  form.seeking_venue.data = artist.seeking_venue
+  form.seeking_description.data = artist.seeking_description
 
   artist_json = {
     "id": artist.id,
@@ -348,7 +347,7 @@ def edit_artist(artist_id):
     "phone": artist.phone,
     "website": artist.website,
     "facebook_link": artist.facebook_link,
-    "seeking_venue": artist.seeking_talent,
+    "seeking_venue": artist.seeking_venue,
     "seeking_description": artist.seeking_description,
     "image_link": artist.image_link
   }
@@ -384,6 +383,9 @@ def edit_venue(venue_id):
   form.facebook_link.data = venue.facebook_link
   form.image_link.data = venue.image_link
   form.genres.data = venue.genres
+  form.website.data = venue.website
+  form.seeking_talent.data = venue.seeking_talent
+  form.seeking_description.data = venue.seeking_description
   
 
   venue_json = {
