@@ -13,7 +13,6 @@ import logging
 from logging import Formatter, FileHandler
 from flask_wtf import FlaskForm, form
 from sqlalchemy.orm import lazyload
-from sqlalchemy.sql.operators import ilike_op
 from forms import *
 #----------------------------------------------------------------------------#
 # App Config.
@@ -209,17 +208,21 @@ def create_venue_form():
 
 @app.route('/venues/create', methods=['POST'])
 def create_venue_submission():
-  # print(request.form.getlist('genres'))
-  venue = Venue(name=request.form.get('name', ''), city=request.form.get('city', ''),
-  state=request.form.get('state', ''), address=request.form.get('address', ''), 
-  phone=request.form.get('phone', ''), image_link=request.form.get('image_link', ''),
-  facebook_link=request.form.get('facebook_link', ''), genres=request.form.getlist('genres'))
+  # venue = Venue(name=request.form.get('name', ''), city=request.form.get('city', ''),
+  # state=request.form.get('state', ''), address=request.form.get('address', ''), 
+  # phone=request.form.get('phone', ''), image_link=request.form.get('image_link', ''),
+  # facebook_link=request.form.get('facebook_link', ''), genres=request.form.getlist('genres'))
+
+  form = VenueForm(request.form)
 
   try:
+    venue = Venue()
+    form.populate_obj(venue)
     db.session.add(venue)
     db.session.commit()
     flash('Venue ' + request.form['name'] + ' was successfully listed!')
-  except:
+  except ValueError as e:
+    print(e)
     db.session.rollback()
     flash('An error occurred. Venue ' + request.form['name'] + ' could not be listed.')
   finally:
@@ -234,7 +237,8 @@ def delete_venue(venue_id):
   try:
     db.session.delete(venue)
     db.session.commit()
-  except:
+  except ValueError as e:
+    print(e)
     db.session.rollback()
   finally:
     db.session.close()
@@ -324,7 +328,7 @@ def show_artist(artist_id):
 #  ----------------------------------------------------------------
 @app.route('/artists/<int:artist_id>/edit', methods=['GET'])
 def edit_artist(artist_id):
-  form = ArtistForm()
+  # form = ArtistForm()
   artist = Artist.query.get(artist_id)
 
   form.name.data = artist.name
@@ -353,22 +357,14 @@ def edit_artist(artist_id):
 
 @app.route('/artists/<int:artist_id>/edit', methods=['POST'])
 def edit_artist_submission(artist_id):
-
+  form = ArtistForm(request.form)
   artist = Artist.query.get(artist_id)
-  artist.name = request.form.get('name', '')
-  artist.city = request.form.get('city', '')
-  artist.state = request.form.get('state', '')
-  artist.phone = request.form.get('phone', '')
-  artist.website = request.form.get('website', '')
-  artist.facebook_link = request.form.get('facebook_link', '')
-  artist.seeking_talent = request.form.get('seeking_talent', False)
-  artist.seeking_description = request.form.get('seeking_description', '')
-  artist.image_link = request.form.get('image_link', '')
-  artist.genres = request.form.getlist('genres')
 
   try:
+    form.populate_obj(artist)
     db.session.commit()
-  except:
+  except ValueError as e:
+    print(e)
     db.session.rollback()
   finally:
     db.session.close()
@@ -411,20 +407,13 @@ def edit_venue(venue_id):
 def edit_venue_submission(venue_id):
 
   venue = Venue.query.get(venue_id)
-  venue.name = request.form.get('name', '')
-  venue.city = request.form.get('city', '')
-  venue.state = request.form.get('state', '')
-  venue.genres = request.form.get('genres', '')
-  venue.phone = request.form.get('phone', '')
-  venue.website = request.form.get('website', '')
-  venue.facebook_link = request.form.get('facebook_link', '')
-  venue.seeking_talent = request.form.get('seeking_talent', False)
-  venue.seeking_description = request.form.get('seeking_description', '')
-  venue.image_link = request.form.get('image_link', '')
+  form = VenueForm(request.form)
 
   try:
+    form.populate_obj(venue)
     db.session.commit()
-  except:
+  except ValueError as e:
+    print(e)
     db.session.rollback()
   finally:
     db.session.close()
@@ -440,17 +429,17 @@ def create_artist_form():
 
 @app.route('/artists/create', methods=['POST'])
 def create_artist_submission():
-  print(request.form.getlist('genres'))
-  artist = Artist(name=request.form.get('name', ''), city=request.form.get('city', ''), 
-  state=request.form.get('state', ''), phone=request.form.get('phone', ''), 
-  image_link=request.form.get('image_link', ''), facebook_link=request.form.get('facebook_link', ''),
-  genres=request.form.getlist('genres'))
+
+  form = ArtistForm(request.form)
 
   try:
+    artist = Artist()
+    form.populate_obj(artist)
     db.session.add(artist)
     db.session.commit()
     flash('Artist ' + request.form['name'] + ' was successfully listed!')
-  except:
+  except ValueError as e:
+    print(e)
     db.session.rollback()
     flash('An error occurred. Artist ' + request.form['name'] + ' could not be listed.')
   finally:
@@ -488,14 +477,16 @@ def create_shows():
 @app.route('/shows/create', methods=['POST'])
 def create_show_submission():
 
-  show = Show(start_date=format_datetime(request.form.get('start_time', '')), artist_id=request.form.get('artist_id', ''),
-  venue_id=request.form.get('venue_id', ''))
+  form = ShowForm(request.form)
 
   try:
+    show = Show()
+    form.populate_obj(show)
     db.session.add(show)
     db.session.commit()
     flash('Show was successfully listed!')
-  except:
+  except ValueError as e:
+    print(e)
     db.session.rollback()
     flash('An error occurred. Show could not be listed.')
   finally:
